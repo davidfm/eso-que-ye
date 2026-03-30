@@ -79,15 +79,15 @@ export default {
             //  Also if the recording is rubbish and it comes up with very poor
             //  matches now they will be flagged up as unlikely.
             if (this.score > 0.65) {
-                return 'Very Close';
+                return 'Muy similar';
             } else if (this.score > 0.5) {
-                return 'Close';
+                return 'Similar';
             } else if (this.score > 0.2) {
-                return 'Possible';
+                return 'Posible';
             } else if (this.score > 0) {
-                return 'Unlikely';
+                return 'Poco probable';
             } else {
-                return 'No Match';
+                return 'Sin coincidencias';
             }
         },
         scoreColour: function () {
