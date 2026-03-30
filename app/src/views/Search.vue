@@ -1,5 +1,14 @@
 <template>
     <div class="search">
+        <router-link to="/">
+            <v-img
+                src="@/assets/logo.svg"
+                max-height="65"
+                max-width="75%"
+                class="mx-auto mt-5"
+                contain
+            />
+        </router-link>
         <RecorderButton
             ref="recorderButton"
             class="mx-auto my-xl-5 pt-5"

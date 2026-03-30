@@ -10,7 +10,7 @@
             <v-icon class="WarningIcon px-3">
                 {{ icons.alertCircle }}
             </v-icon>
-            <span>You are not using the stable release version of FolkFriend, which is at <a href="https://folkfriend.app">folkfriend.app</a>. This is the development version, which may contain features which are untested.</span>
+            <span>Versión en desarrollo. La versión final está en <a href="https://esoqueye.asturtrad.eu/">https://esoqueye.asturtrad.eu/</a></span>
         </v-card>
         <v-card class="pa-5 my-2">
             <h1>Acerca de</h1>
