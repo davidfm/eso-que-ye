@@ -62,20 +62,10 @@ export default class utils {
     }
 
     static parseDisplayableName(rawName) {
-        // https://bitbucket.org/Tom_Wyllie/folk-friend-web-app/src/master/app/js/folkfriend-app.js
         if (rawName.endsWith(', the')) {
-            rawName = 'the ' + rawName.slice(0, -5);
+            return 'the ' + rawName.slice(0, -5);
         }
-
-        let words = rawName.split(' ');
-
-        // Ensure small words are not capitalised, unless they are at the start of the word
-        for (let [i, word] of words.entries()) {
-            if (!(LOWER_TITLE_WORDS.has(word.toLowerCase()) && i > 0)) {
-                words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
-            }
-        }
-        return words.join(' ');
+        return rawName;
     }
 
     static parseDisplayableDescription(setting) {
