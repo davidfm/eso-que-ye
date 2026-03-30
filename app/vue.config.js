@@ -36,7 +36,7 @@ module.exports = {
         // }
     },
     pwa: {
-        name: 'FolkFriend',
+        name: 'Eso qué ye?',
         theme_color: '#055581',
         background_color: '#055581',
     },

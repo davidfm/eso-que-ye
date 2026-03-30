@@ -98,15 +98,6 @@
                 {{ icons.close }}
             </v-icon>
 
-            <v-img
-                src="@/assets/logo.svg"
-                max-height="90%"
-                max-width="75%"
-                class="mx-auto MainLogo"
-                align-center
-                center
-                contain
-            />
         </v-app-bar>
 
         <v-main>

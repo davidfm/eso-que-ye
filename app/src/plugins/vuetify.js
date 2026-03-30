@@ -11,9 +11,9 @@ const opts = {
         },
         themes: {
             light: {
-                primary: '#055581',
-                secondary: '#FF3B3F',
-                accent: '#3585C1',
+                primary: '#d4135b',
+                secondary: '#d4135b',
+                accent: '#333333',
                 error: '#B71C1C',
             },
         },
