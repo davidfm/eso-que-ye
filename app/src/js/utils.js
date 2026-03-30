@@ -149,6 +149,6 @@ export default class utils {
     }
 
     static isStableRelease() {
-        return /folkfriend.app/.test(window.location.href.toLowerCase());
+        return /esoqueye\.asturtrad\.eu/.test(window.location.href.toLowerCase());
     }
 }
