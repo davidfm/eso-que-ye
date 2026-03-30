@@ -1,3 +1,4 @@
+// Modified by David Fernández, 2026. See git history for details.
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Search from '@/views/Search.vue';

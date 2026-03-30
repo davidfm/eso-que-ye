@@ -1,3 +1,4 @@
+<!-- Modified by David Fernández, 2026. See git history for details. -->
 <template>
     <a :href="asturTradUrl" target="_blank">
         <v-container

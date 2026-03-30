@@ -1,4 +1,5 @@
 // Self-contained functions which come in handy throughout the project
+// Modified by David Fernández, 2026. See git history for details.
 
 // https://grammar.yourdictionary.com/capitalization/rules-for-capitalization-in-titles.html
 const LOWER_TITLE_WORDS = new Set(['a', 'an', 'the', 'at', 'by', 'for', 'in', 'of', 'on', 'to', 'up', 'and', 'as', 'but', 'or', 'nor']);

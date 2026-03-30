@@ -1,4 +1,5 @@
 <!--suppress CssUnusedSymbol, CssUnresolvedCustomProperty -->
+<!-- Modified by David Fernández, 2026. See git history for details. -->
 <template>
     <div>
         <transition
@@ -128,7 +129,7 @@ export default {
                     try {
                         await this.startRecording();
                     } catch (e) {
-                        let errorMsg = `Could not access microphone (${e.message}). You can still upload audio files by setting 'file upload' in settings.`;
+                        let errorMsg = `No se pudo acceder al micrófono (${e.message}).`;
                         console.warn(errorMsg);
                         this.snackbar = true;
                         this.snackbarText = errorMsg;
