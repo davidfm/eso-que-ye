@@ -38,11 +38,7 @@ class FolkFriendWASMWrapper {
     }
 
     async fetchTuneIndexMetadata() {
-        let url = '/res/nud-meta.json';
-        // eslint-disable-next-line no-undef
-        if (process.env.NODE_ENV === 'production') {
-            url = 'https://folkfriend-app-data.web.app/nud-meta.json';
-        }
+        let url = '/nud-meta.json';
         let indexData = await fetch(url)
             .then((response) => response.json())
             .catch((err) => console.log(err));
@@ -52,12 +48,7 @@ class FolkFriendWASMWrapper {
     async fetchTuneIndexData() {
         console.time('index-fetch');
 
-        let url = '/res/folkfriend-non-user-data.json';
-
-        // eslint-disable-next-line no-undef
-        if (process.env.NODE_ENV === 'production') {
-            url = 'https://folkfriend-app-data.web.app/folkfriend-non-user-data.json';
-        }
+        let url = '/folkfriend-non-user-data.json';
 
         // Fetch
         let indexData = await fetch(url)
@@ -137,16 +128,10 @@ class FolkFriendWASMWrapper {
 
             const remoteVersion = tuneIndexMetadataRemote['v'];
             const localVersion = tuneIndexMetadataLocal['v'];
-            const daysSinceUpdate = remoteVersion - localVersion;
-            console.debug(`Tune index was ${daysSinceUpdate} days out of date`);
+            const hasUpdate = remoteVersion !== localVersion;
+            console.debug(`Tune index remote: ${remoteVersion}, local: ${localVersion}`);
 
-            // Folkfriend's TuneIndex (at time of writing) updates once a week,
-            //  scheduled to update just after the latest data dump on Github
-            //  from thesession.org. Having all users automatically update the 
-            //  whole index every week is a little overkill though and uses a
-            //  lot of bandwidth (which may not be free). Only auto-update if
-            //  it's been a while since the last update. A while = 4 weeks.
-            if (daysSinceUpdate >= 28) {
+            if (hasUpdate) {
                 console.debug('Upgrading tune index');
                 const downloadedTuneIndex = await this.fetchTuneIndexData();
                 await set('tuneIndex', downloadedTuneIndex);
@@ -155,7 +140,6 @@ class FolkFriendWASMWrapper {
                 analyticsData['tune_index_metadata_version'] = tuneIndexMetadataRemote['v'];
                 analyticsData['newly_updated'] = true;
             } else {
-                analyticsData['days_since_update'] = daysSinceUpdate;
                 analyticsData['tune_index_metadata_version'] = tuneIndexMetadataLocal['v'];
             }
         }

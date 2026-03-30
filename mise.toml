@@ -1,0 +1,27 @@
+[tools]
+node = "22"
+rust = "stable"
+
+[tasks.setup]
+description = "Install wasm-pack and npm dependencies"
+run = [
+    "cargo install wasm-pack",
+    "npm --prefix app install",
+]
+
+[tasks.wasm]
+description = "Compile Rust to WebAssembly (run after Rust changes)"
+dir = "rust"
+run = "./wasm_build.sh"
+
+[tasks.dev]
+description = "Start the development server (run wasm first if needed)"
+dir = "app"
+run = "npm run serve"
+
+[tasks.build]
+description = "Production build"
+run = [
+    "cd rust && ./wasm_build.sh",
+    "npm --prefix app run build",
+]
