@@ -32,7 +32,7 @@
             </p>
         </v-card>
         <p class="AppInfo">
-            Índice de melodías: {{ tuneIndexVersion }}<br>Basado en FolkFriend v1.3.0<br>© {{ year }} Tom Wyllie (original) · Fork adaptado por David Fernández para AsturTrad
+            Eso qué ye? v{{ appVersion }} · Basado en FolkFriend v1.3.0<br>Índice de melodías: {{ tuneIndexVersion }}<br>© {{ year }} Tom Wyllie (original) · Fork de David Fernández
         </p>
     </v-container>
 </template>
@@ -66,6 +66,7 @@ export default {
             dotsVertical: mdiDotsVertical,
         },
         isStableRelease: utils.isStableRelease(),
+        appVersion: process.env.PACKAGE_VERSION,
         year: new Date().getFullYear(),
         tuneIndexVersion: '...',
     }),
