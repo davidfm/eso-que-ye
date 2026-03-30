@@ -48,4 +48,10 @@ const router = new VueRouter({
     routes
 });
 
+// Handle redirect from 404.html for GitHub Pages SPA routing
+const redirect = new URLSearchParams(window.location.search).get('redirect');
+if (redirect) {
+    router.replace(redirect);
+}
+
 export default router;
