@@ -1,14 +1,5 @@
 <template>
-    <router-link
-        :to="{
-            name: 'tune',
-            params: {
-                settingID: settingID,
-                tuneID: setting.tune_id,
-                displayName: displayName,
-            },
-        }"
-    >
+    <a :href="asturTradUrl" target="_blank">
         <v-container
             v-ripple
             @click="addToHistory"
@@ -31,7 +22,7 @@
                 </v-col>
             </v-row>
         </v-container>
-    </router-link>
+    </a>
 </template>
 
 <script>
@@ -63,6 +54,12 @@ export default {
     },
 
     computed: {
+        asturTradUrl: function () {
+            if (this.settingID && this.settingID !== this.setting.tune_id) {
+                return `https://asturtrad.eu/tune/${this.settingID}`;
+            }
+            return `https://asturtrad.eu/tune/${this.setting.tune_id}/`;
+        },
         descriptor: function () {
             return utils.parseDisplayableDescription(this.setting);
         },

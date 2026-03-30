@@ -38,6 +38,7 @@ class FFBackend {
                 resolve(analyticsData);
             }));
         });
+        store.state.tuneIndexVersion = analyticsData.tune_index_metadata_version;
         store.logAnalyticsEvent('tune_index_init', analyticsData).then();
     }
 
@@ -81,7 +82,7 @@ class FFBackend {
         return new Promise(resolve => {
             this.folkfriendWorker.runTranscriptionQuery(query, Comlink.proxy(response => {
                 console.timeEnd('run-transcription-query');
-                resolve(response);
+                resolve(response.slice(0, 5));
             }));
         });
     }
@@ -156,7 +157,7 @@ class FFBackend {
 
         if (!doQuery) {
             router.push({
-                name: 'notes'
+                name: 'results'
             });
             eventBus.$emit('childViewActivated');
         }

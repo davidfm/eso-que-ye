@@ -38,6 +38,10 @@ export default {
         timestamp: {
             type: Number,
             required: true
+        },
+        url: {
+            type: String,
+            required: true
         }
     },
     computed: {
@@ -47,7 +51,7 @@ export default {
     },
     methods: {
         historyItemClicked() {
-            this.$emit('historyItemClicked', this.timestamp);
+            window.open(this.url, '_blank');
         }
     }
 };

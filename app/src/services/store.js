@@ -24,7 +24,8 @@ class Store {
             lastResults: [],
             lastContour: '',
             lastTimer: null,
-            backendVersion: 'not loaded'
+            backendVersion: 'not loaded',
+            tuneIndexVersion: 'not loaded'
         };
 
         this.searchStates = {

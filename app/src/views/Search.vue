@@ -26,7 +26,7 @@
                 >
                     <v-text-field
                         v-model="textQuery"
-                        label="Search By Tune Name"
+                        label="Buscar por nombre"
                         solo
                         @keypress.enter="nameQuery"
                     >
@@ -100,14 +100,14 @@ export default {
 
         eventBus.$on('searchError', (errorMsg) => {
             this.snackbar = true;
-            this.snackbarText = errorMsg || 'An error ocurred 😟';
+            this.snackbarText = errorMsg || 'Se produjo un error';
         });
     },
     methods: {
         nameQuery() {
             if(this.textQuery.length < 2) {
                 this.snackbar = true;
-                this.snackbarText = 'Search query too short';
+                this.snackbarText = 'La búsqueda es demasiado corta';
                 return;
             }
 
