@@ -17,28 +17,13 @@
                         </v-list-item-action>
                         <v-list-item-content>
                             <v-list-item-title class="navBarEntry">
-                                Search
+                                Buscar
                             </v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
                 </router-link>
 
-                <router-link to="/notes">
-                    <v-list-item @click="0">
-                        <v-list-item-action>
-                            <v-icon medium>
-                                {{ icons.musicNote }}
-                            </v-icon>
-                        </v-list-item-action>
-                        <v-list-item-content>
-                            <v-list-item-title class="navBarEntry">
-                                Notes
-                            </v-list-item-title>
-                        </v-list-item-content>
-                    </v-list-item>
-                </router-link>
-
-                <router-link to="/results">
+<router-link to="/results">
                     <v-list-item @click="0">
                         <v-list-item-action>
                             <v-icon medium>
@@ -47,7 +32,7 @@
                         </v-list-item-action>
                         <v-list-item-content>
                             <v-list-item-title class="navBarEntry">
-                                Results
+                                Resultados
                             </v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
@@ -62,28 +47,13 @@
                         </v-list-item-action>
                         <v-list-item-content>
                             <v-list-item-title class="navBarEntry">
-                                History
+                                Historial
                             </v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
                 </router-link>
 
-                <router-link to="/settings">
-                    <v-list-item @click="0">
-                        <v-list-item-action>
-                            <v-icon medium>
-                                {{ icons.cog }}
-                            </v-icon>
-                        </v-list-item-action>
-                        <v-list-item-content>
-                            <v-list-item-title class="navBarEntry">
-                                Settings
-                            </v-list-item-title>
-                        </v-list-item-content>
-                    </v-list-item>
-                </router-link>
-
-                <router-link to="/help">
+<router-link to="/help">
                     <v-list-item @click="0">
                         <v-list-item-action>
                             <v-icon medium>
@@ -92,26 +62,12 @@
                         </v-list-item-action>
                         <v-list-item-content>
                             <v-list-item-title class="navBarEntry">
-                                About
+                                Acerca de
                             </v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
                 </router-link>
 
-                <a href="https://donorbox.org/help-support-development-of-folkfriend" target="_blank">
-                    <v-list-item @click="0">
-                        <v-list-item-action>
-                            <v-icon medium>
-                                {{ icons.heart }}
-                            </v-icon>
-                        </v-list-item-action>
-                        <v-list-item-content>
-                            <v-list-item-title class="navBarEntry">
-                                Donate
-                            </v-list-item-title>
-                        </v-list-item-content>
-                    </v-list-item>
-                </a>
             </v-list>
         </v-navigation-drawer>
 
@@ -151,12 +107,6 @@
                 center
                 contain
             />
-            <v-icon
-                color="primary"
-                @click="clickSettings"
-            >
-                {{ icons.cog }}
-            </v-icon>
         </v-app-bar>
 
         <v-main>
@@ -167,25 +117,19 @@
 
 
 <script>
-import { initializeApp } from 'firebase/app';
-import { getAnalytics } from 'firebase/analytics';
-
 import ffBackend from '@/services/backend.js';
 import store from '@/services/store.js';
 import eventBus from '@/eventBus.js';
 import router from '@/router/index.js';
 import {
     mdiChevronLeft,
-    mdiCog,
     mdiClose,
     mdiDownload,
     mdiFormatListBulleted,
     mdiHelpCircleOutline,
     mdiHistory,
-    mdiHeart,
     mdiMenu,
     mdiMicrophone,
-    mdiMusicNote,
     // mdiShareVariant,
 } from '@mdi/js';
 import utils from '@/js/utils.js';
@@ -203,16 +147,13 @@ export default {
         hamburgerState: 'hamburger',
         icons: {
             chevronLeft: mdiChevronLeft,
-            cog: mdiCog,
             close: mdiClose,
             download: mdiDownload,
             formatListBulleted: mdiFormatListBulleted,
-            heart: mdiHeart,
             help: mdiHelpCircleOutline,
             history: mdiHistory,
             menu: mdiMenu,
             microphone: mdiMicrophone,
-            musicNote: mdiMusicNote,
             // shareVariant: mdiShareVariant,
         },
         isPWA: utils.checkStandalone(),
@@ -276,39 +217,8 @@ export default {
                 window.location.reload(false);
             }
         },
-        clickSettings() {
-            if(this.$route.name != 'settings') {
-                // User can shortcut back to search if they tap the settings from there.
-                //  If tapped from anywhere else just goes back to a normal hamburger state.
-                if(this.$route.name == 'search') {
-                    eventBus.$emit('childViewActivated');
-                }
-
-                router.push({ name: 'settings' });
-            }
-        },
     },
 };
-
-async function initAnalytics() {
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-        // This **IS** okay to be public !!!
-        apiKey: 'AIzaSyBy36nafCGgjwzQ1FvxUhHd6RyBZ_YnPis',
-        authDomain: 'folk-friend.firebaseapp.com',
-        databaseURL: 'https://folk-friend.firebaseio.com',
-        projectId: 'folk-friend',
-        storageBucket: 'folk-friend.appspot.com',
-        messagingSenderId: '632280350288',
-        appId: '1:632280350288:web:c4869728d2b5241b1edb55'
-    };
-
-    // Initialize Firebase analytics
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    store.loadAnalytics(analytics);
-    store.logAnalyticsEvent('running_standalone', {'value': utils.checkStandalone()}).then();
-}
 
 async function initSetup() {
     ffBackend.version().then((version) => {
@@ -316,7 +226,6 @@ async function initSetup() {
         console.info('Loaded folkfriend backend version', version);
     });
     await ffBackend.setupTuneIndex();
-    await initAnalytics();
 }
 </script>
 

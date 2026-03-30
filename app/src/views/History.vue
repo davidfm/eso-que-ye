@@ -3,7 +3,7 @@
         class="viewContainerWrapper"
     >
         <h1 class="my-2">
-            History
+            Historial
         </h1>
         <v-list class="resultsTable">
             <HistoryRow
@@ -12,7 +12,7 @@
                 :name="historyRow.name"
                 :descriptor="historyRow.descriptor"
                 :timestamp="historyRow.timestamp"
-                @historyItemClicked="loadHistoryItem"
+                :url="historyRow.url"
             />
         </v-list>
     </v-container>
@@ -23,7 +23,6 @@ import eventBus from '@/eventBus';
 import store from '@/services/store';
 import HistoryRow from '@/components/HistoryRow';
 import utils from '@/js/utils';
-import router from '@/router/index.js';
 
 export default {
     name: 'HistoryView',
@@ -39,50 +38,23 @@ export default {
     created: function () {
         eventBus.$emit('parentViewActivated');
         store.getHistoryItems().then((historyItems) => {
-            this.historyItems = historyItems;
-            this.historyRowsProps = historyItems.map((historyItem) => {
-                if(historyItem.result.contour) {
-                    return {
-                        name: 'Recording',
-                        descriptor: 'Notes from audio',
-                        timestamp: historyItem.timestamp,
-                    };
-                }
+            this.historyItems = historyItems.filter(i => !i.result.contour);
+            this.historyRowsProps = this.historyItems.map((historyItem) => {
+                const tuneID = historyItem.result.setting.tune_id;
+                const settingID = historyItem.result.settingID;
+                const url = settingID && settingID !== tuneID
+                    ? `https://asturtrad.eu/tune/${settingID}`
+                    : `https://asturtrad.eu/tune/${tuneID}/`;
                 return {
                     name: utils.parseDisplayableName(historyItem.result.displayName),
                     descriptor: utils.parseDisplayableDescription(historyItem.result.setting),
                     timestamp: historyItem.timestamp,
+                    url,
                 };
             });
         });
     },
-    methods: {
-        loadHistoryItem(timestamp) {
-            for(let historyItem of this.historyItems) {
-                // Assume timestamps are unique. There's near-millisecond
-                //  resolution so in practice it always should be.
-                if(historyItem.timestamp === timestamp) {
-                    const result = historyItem.result;
-                    if(result.contour) {
-                        store.state.lastContour = result.contour;
-                        router.push({
-                            name: 'notes'
-                        });
-                        eventBus.$emit('childViewActivated');
-                    } else {
-                        router.push({
-                            name: 'tune',
-                            params: {
-                                tuneID: result.setting.tune_id,
-                                settingID: result.settingID,
-                                displayName: result.displayName
-                            }
-                        });
-                    }
-                }
-            }
-        }
-    }
+    methods: {}
 };
 </script>
 

@@ -4,7 +4,7 @@
         class="viewContainerWrapper"
     >
         <h1 class="my-2">
-            Results
+            Resultados
         </h1>
         <v-list class="resultsTable">
             <ResultRow
@@ -19,10 +19,10 @@
     </v-container>
     <v-container v-else>
         <h1 class="my-2">
-            Results
+            Resultados
         </h1>
         <p>
-            Please record some music or upload an audio file to search the tune database.
+            Graba o sube un audio para buscar en la base de datos de melodías.
         </p>
     </v-container>
 </template>
