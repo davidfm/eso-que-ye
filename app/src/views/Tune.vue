@@ -98,7 +98,7 @@ export default {
                 openInNew: mdiOpenInNew,
 
             },
-            sourceTheSession: `https://thesession.org/tunes/${this.tuneID}`
+            sourceAsturTrad: `https://asturtrad.eu/tune/${this.tuneID}`
         };
     },
     created: async function () {
@@ -176,7 +176,7 @@ export default {
             }
         },
         sourceClicked: function () {
-            window.open(this.sourceTheSession);
+            window.open(this.sourceAsturTrad);
         }
     },
 };

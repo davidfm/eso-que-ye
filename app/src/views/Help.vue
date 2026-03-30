@@ -12,48 +12,34 @@
             <span>You are not using the stable release version of FolkFriend, which is at <a href="https://folkfriend.app">folkfriend.app</a>. This is the development version, which may contain features which are untested.</span>
         </v-card>
         <v-card class="pa-5 my-2">
-            <h1>About</h1>
+            <h1>Acerca de</h1>
             <p>
-                FolkFriend listens to instrumental folk music, transcribes the
-                melody to sheet music, and searches a database of traditional
-                tunes for matches. You may either use the microphone on your
-                device, or upload an existing audio file. FolkFriend runs
-                entirely in browser and works without an internet connection.
+                <em>Eso qué ye?</em> es una herramienta para reconocer música instrumental
+                tradicional asturiana. Escucha una melodía, la transcribe a partitura y busca
+                coincidencias en la biblioteca de <a href="https://asturtrad.eu" target="_blank">AsturTrad</a>.
+                Funciona completamente en el navegador, sin necesidad de conexión a internet.
+            </p>
+            <p>
+                Esta aplicación es un fork de <a href="https://folkfriend.app" target="_blank">FolkFriend</a>,
+                desarrollada originalmente por <a href="https://github.com/TomWyllie" target="_blank">Tom Wyllie</a>,
+                a quien corresponde todo el mérito por el motor de reconocimiento, la arquitectura
+                y la aplicación original. Si tocas música folk irlandesa o de otras tradiciones,
+                visita <a href="https://folkfriend.app" target="_blank">folkfriend.app</a>.
+            </p>
+            <p>
+                Este proyecto está licenciado bajo <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank">GPL-3.0</a>.
+                El código fuente está disponible en <a href="https://github.com/davidfm/eso-que-ye" target="_blank">GitHub</a>.
             </p>
         </v-card>
-        <v-card
-            class="pa-5 my-2"
-        >
-            <h1>Share</h1>
-            <p>Scan the QR code on another device to open FolkFriend.</p>
-            <v-img
-                src="@/assets/qr-code.svg"
-                class="mx-auto QRCode"
-                align-center
-                center
-                contain
-            />
-        </v-card>
-        <v-card class="pa-5 my-2">
-            <h1>Feedback</h1>
-            FolkFriend has been a five-year project by a single developer. 
-            Please send any bugs reports, feature requests, or general feedback, 
-            to <a
-                class="feedbackEmail"
-                href="mailto:feedback@folkfriend.app"
-            >feedback@folkfriend.app</a>.
-        </v-card>
         <p class="AppInfo">
-            Folkfriend app version: {{ frontendVersion }}<br>Folkfriend library version:
-            {{ backendVersion }}<br>© {{ year }} Tom Wyllie. All Rights Reserved.
+            Índice de melodías: {{ tuneIndexVersion }}<br>Basado en FolkFriend v1.3.0<br>© {{ year }} Tom Wyllie (original) · Fork adaptado por David Fernández para AsturTrad
         </p>
     </v-container>
 </template>
 
 <script>
-import store from '@/services/store.js';
-import ffConfig from '@/ffConfig.js';
 import eventBus from '@/eventBus';
+import { get } from 'idb-keyval';
 import utils from '@/js/utils.js';
 
 import {
@@ -80,18 +66,14 @@ export default {
             dotsVertical: mdiDotsVertical,
         },
         isStableRelease: utils.isStableRelease(),
-        year: new Date().getFullYear()
+        year: new Date().getFullYear(),
+        tuneIndexVersion: '...',
     }),
-    computed: {
-        backendVersion() {
-            return store.state.backendVersion;
-        },
-        frontendVersion() {
-            return ffConfig.FRONTEND_VERSION;
-        },
-    },
-    created: function () {
+    computed: {},
+    created: async function () {
         eventBus.$emit('parentViewActivated');
+        const meta = await get('tuneIndexMetadata');
+        if (meta) this.tuneIndexVersion = meta.v;
     },
     mounted: function () {
         if(this.download) {

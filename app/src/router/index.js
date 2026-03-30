@@ -2,10 +2,8 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Search from '@/views/Search.vue';
 // import Donate from '@/views/Donate.vue';
-import Notes from '@/views/Notes.vue';
 import Results from '@/views/Results.vue';
 import Tune from '@/views/Tune.vue';
-import Settings from '@/views/Settings.vue';
 import History from '@/views/History.vue';
 import Help from '@/views/Help.vue';
 
@@ -15,10 +13,6 @@ const routes = [{
     path: '/',
     name: 'search',
     component: Search
-}, {
-    path: '/notes',
-    name: 'notes',
-    component: Notes
 }, {
     path: '/results',
     name: 'results',
@@ -32,10 +26,6 @@ const routes = [{
     path: '/history',
     name: 'history',
     component: History
-}, {
-    path: '/settings',
-    name: 'settings',
-    component: Settings
 }, {
     path: '/help',
     name: 'help',
