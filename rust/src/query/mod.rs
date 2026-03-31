@@ -22,6 +22,7 @@ pub struct TranscriptionQueryRecord {
     pub setting_id: SettingID,
     pub setting: Setting,
     pub display_name: String,
+    pub aliases: Vec<String>,
     pub score: f32,
 }
 
@@ -29,6 +30,7 @@ pub struct TranscriptionQueryRecord {
 pub struct NameQueryRecord {
     pub setting: Setting,
     pub display_name: String,
+    pub aliases: Vec<String>,
 }
 
 pub type TranscriptionQueryResults = Vec<TranscriptionQueryRecord>;
@@ -104,11 +106,13 @@ impl QueryEngine {
                     }
 
                     tune_ids_in_results.insert(setting.tune_id.clone());
+                    let tune_aliases = tune_index.aliases.get(&setting.tune_id).unwrap();
                     results.push(TranscriptionQueryRecord {
                         setting_id: setting_id.clone(),
                         setting: setting.clone(),
                         score: *score,
-                        display_name: tune_index.aliases.get(&setting.tune_id).unwrap()[0].clone(),
+                        display_name: tune_aliases[0].clone(),
+                        aliases: tune_aliases[1..].to_vec(),
                     });
 
                     if results.len() >= self.num_output {
@@ -150,17 +154,19 @@ impl QueryEngine {
                     .filter(|t| tune_ids_in_results.insert(t.tune_id.clone()))
                     .take(20)
                     .map(|t| {
-                        NameQueryRecord {
-                            // TODO safer checks in index builder that there can
-                            //  never be an alias without a corresponding setting
-                            setting: tune_index
-                                .settings
-                                .get(&self.setting_ids_from_tune_id(t.tune_id.clone()).unwrap()[0])
-                                .unwrap()
-                                .clone(),
-                            display_name: tune_index.aliases.get(&t.tune_id).unwrap()
-                                [t.alias_index]
-                                .clone(),
+                        {
+                            let tune_aliases = tune_index.aliases.get(&t.tune_id).unwrap();
+                            NameQueryRecord {
+                                // TODO safer checks in index builder that there can
+                                //  never be an alias without a corresponding setting
+                                setting: tune_index
+                                    .settings
+                                    .get(&self.setting_ids_from_tune_id(t.tune_id.clone()).unwrap()[0])
+                                    .unwrap()
+                                    .clone(),
+                                display_name: tune_aliases[0].clone(),
+                                aliases: tune_aliases[1..].to_vec(),
+                            }
                         }
                     })
                     .collect();

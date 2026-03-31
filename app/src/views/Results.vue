@@ -12,6 +12,7 @@
                 :key="`${result.setting.tune_id}`"
                 :setting="result.setting"
                 :display-name="result.display_name"
+                :aliases="result.aliases || []"
                 :setting-i-d="result.setting_id"
                 :score="result.score"
             />
