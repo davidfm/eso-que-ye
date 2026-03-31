@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["master"]
+    branches: ["main"]
   repository_dispatch:
     types: [tune-index-updated]
   workflow_dispatch:
