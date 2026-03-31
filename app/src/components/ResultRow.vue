@@ -113,6 +113,7 @@ export default {
                 settingID: this.settingID,
                 setting: this.setting,
                 displayName: this.displayName,
+                aliases: this.aliases,
             }));
         },
     },
