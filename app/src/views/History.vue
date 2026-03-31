@@ -10,6 +10,7 @@
                 v-for="historyRow in historyRowsProps"
                 :key="`${historyRow.timestamp}`"
                 :name="historyRow.name"
+                :aliases="historyRow.aliases"
                 :descriptor="historyRow.descriptor"
                 :timestamp="historyRow.timestamp"
                 :url="historyRow.url"
@@ -47,6 +48,7 @@ export default {
                     : `https://asturtrad.eu/tune/${tuneID}/`;
                 return {
                     name: utils.parseDisplayableName(historyItem.result.displayName),
+                    aliases: (historyItem.result.aliases || []).map(a => utils.parseDisplayableName(a)),
                     descriptor: utils.parseDisplayableDescription(historyItem.result.setting),
                     timestamp: historyItem.timestamp,
                     url,
