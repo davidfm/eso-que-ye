@@ -6,6 +6,11 @@ on:
   repository_dispatch:
     types: [tune-index-updated]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tune index release tag to deploy (e.g. tune-index-2024-01-01T12-00-00)'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -70,7 +75,12 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          gh release download tune-index-latest \
+          RELEASE_TAG="${{ github.event.client_payload.release_tag || inputs.release_tag }}"
+          if [ -z "$RELEASE_TAG" ]; then
+            RELEASE_TAG=$(gh release list --repo ${{ secrets.TUNE_INDEX_REPO }} --limit 20 --json tagName \
+              --jq '[.[] | select(.tagName | startswith("tune-index-"))] | first | .tagName')
+          fi
+          gh release download "$RELEASE_TAG" \
             --repo ${{ secrets.TUNE_INDEX_REPO }} \
             --pattern "*.json" \
             --dir app/public/
