@@ -14,6 +14,15 @@ description = "Compile Rust to WebAssembly (run after Rust changes)"
 dir = "rust"
 run = "./wasm_build.sh"
 
+[tasks.index]
+description = "Download the latest tune index from the AsturTrad releases (needs gh auth)"
+run = '''
+TAG=$(gh release list --repo davidfm/asturtrad --limit 20 --json tagName \
+  --jq '[.[] | select(.tagName | startswith("tune-index-"))] | first | .tagName')
+echo "Downloading $TAG"
+gh release download "$TAG" --repo davidfm/asturtrad --pattern "*.json" --dir app/public/ --clobber
+'''
+
 [tasks.dev]
 description = "Start the development server (run wasm first if needed)"
 dir = "app"

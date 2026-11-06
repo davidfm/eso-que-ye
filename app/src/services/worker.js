@@ -1,3 +1,5 @@
+// Modified by David Fernández, 2026. See git history for details.
+
 import * as Comlink from '@/js/comlink';
 import ffConfig from '@/ffConfig';
 import {get,
@@ -222,6 +224,23 @@ class FolkFriendWASMWrapper {
         await this.loadedIndex;
         const response = await this.folkfriendWASM.run_transcription_query(query);
         cb(JSON.parse(response));
+    }
+
+    async tuningOffsetCents(cb) {
+        await this.loadedWASM;
+        cb(this.folkfriendWASM.tuning_offset_cents());
+    }
+
+    async transcribePCMBufferSnapshot(cb) {
+        try {
+            const contour = await this.folkfriendWASM.transcribe_pcm_buffer_snapshot();
+            cb(contour);
+        } catch (e) {
+            console.error(e);
+            cb(JSON.stringify({
+                'error': 'An error ocurred whilst transcribing audio.'
+            }));
+        }
     }
 
     async runNameQuery(query, cb) {

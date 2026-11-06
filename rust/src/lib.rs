@@ -1,3 +1,5 @@
+// Modified by David Fernández, 2026. See git history for details.
+
 pub mod abc;
 pub mod decode;
 pub mod feature;
@@ -74,14 +76,25 @@ impl FolkFriend {
     pub fn transcribe_pcm_buffer(
         &mut self,
     ) -> Result<decode::types::ContourString, decode::DecoderError> {
-        let lattice_path = self
-            .feature_decoder
-            .decode_lattice_path(&mut self.feature_extractor.features)?;
-        let contour = self
-            .feature_decoder
-            .decode_contour(&lattice_path, &self.feature_extractor.features);
+        let mut features = self.feature_extractor.features();
+        let lattice_path = self.feature_decoder.decode_lattice_path(&mut features)?;
+        let contour = self.feature_decoder.decode_contour(&lattice_path, &features);
         self.feature_extractor.flush();
         return contour;
+    }
+
+    pub fn transcribe_pcm_buffer_snapshot(
+        &self,
+    ) -> Result<decode::types::ContourString, decode::DecoderError> {
+        // Transcribe what has been recorded so far without consuming it, so
+        //  that recording can carry on.
+        let mut features = self.feature_extractor.features();
+        let lattice_path = self.feature_decoder.decode_lattice_path(&mut features)?;
+        self.feature_decoder.decode_contour(&lattice_path, &features)
+    }
+
+    pub fn tuning_offset_cents(&self) -> f32 {
+        self.feature_extractor.tuning_offset_cents()
     }
 
     pub fn run_transcription_query(
@@ -195,6 +208,20 @@ impl FolkFriendWASM {
 
     pub fn transcribe_pcm_buffer(&mut self) -> String {
         match self.ff.transcribe_pcm_buffer() {
+            Ok(transcription) => transcription,
+            Err(_) => json!({
+                "error": "Could not detect any notes".to_string()
+            })
+            .to_string(),
+        }
+    }
+
+    pub fn tuning_offset_cents(&self) -> f32 {
+        self.ff.tuning_offset_cents()
+    }
+
+    pub fn transcribe_pcm_buffer_snapshot(&self) -> String {
+        match self.ff.transcribe_pcm_buffer_snapshot() {
             Ok(transcription) => transcription,
             Err(_) => json!({
                 "error": "Could not detect any notes".to_string()

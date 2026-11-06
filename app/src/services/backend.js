@@ -1,3 +1,5 @@
+// Modified by David Fernández, 2026. See git history for details.
+
 import * as Comlink from '@/js/comlink.js';
 import store from '@/services/store.js';
 import router from '@/router/index.js';
@@ -87,6 +89,43 @@ class FFBackend {
         });
     }
 
+    async hasConfidentMatch() {
+        // Transcribe and search what has been recorded so far, without
+        //  stopping the recording.
+        const cents = await new Promise(resolve => {
+            this.folkfriendWorker.tuningOffsetCents(Comlink.proxy(resolve));
+        });
+        console.debug(`tuning ${cents >= 0 ? '+' : ''}${Math.round(cents)} cents from A = 440 Hz`);
+
+        const contour = await new Promise(resolve => {
+            this.folkfriendWorker.transcribePCMBufferSnapshot(Comlink.proxy(resolve));
+        });
+
+        try {
+            if (JSON.parse(contour)['error']) {
+                return false;
+            }
+        } catch (e) {
+            // Not JSON, so a contour rather than an error
+        }
+
+        const results = await new Promise(resolve => {
+            this.folkfriendWorker.runTranscriptionQuery(contour, Comlink.proxy(resolve));
+        });
+        if (!Array.isArray(results) || results.length === 0) {
+            return false;
+        }
+
+        const best = results[0].score;
+        const runnerUp = results.length > 1 ? results[1].score : 0;
+        const confident = best >= ffConfig.EARLY_STOP_MIN_SCORE &&
+            best - runnerUp >= ffConfig.EARLY_STOP_MIN_MARGIN;
+        console.debug('early stop check', confident, results.slice(0, 3).map(
+            r => `${r.display_name} ${r.score.toFixed(3)} (${r.transposition >= 0 ? '+' : ''}${r.transposition} st)`
+        ));
+        return confident;
+    }
+
     async submitFilledBuffer() {
         let t0 = performance.now();
         const contour = await this.transcribePCMBuffer();
@@ -142,6 +181,9 @@ class FFBackend {
                 return;
             }
 
+            console.debug('results', queryResults.map(
+                r => `${r.display_name} ${r.score.toFixed(3)} (${r.transposition >= 0 ? '+' : ''}${r.transposition} st)`
+            ));
             store.state.lastResults = queryResults;
 
             router.push({

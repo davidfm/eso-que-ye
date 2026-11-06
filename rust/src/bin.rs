@@ -1,3 +1,5 @@
+// Modified by David Fernández, 2026. See git history for details.
+
 extern crate folkfriend;
 
 use clap::{App, Arg};
@@ -118,10 +120,11 @@ fn process_audio_files(ff: FolkFriend, input: String, with_transcription_query: 
         let feature_decoder = folkfriend::decode::FeatureDecoder::new(sample_rate).expect("Invalid sample rate");
 
         fe.feed_signal(signal);
+        let mut features = fe.features();
 
         if debug {
             let out_path = format!("{}.a-features.png", base_debug_path);
-            save_features_as_img(&fe.features, &out_path);
+            save_features_as_img(&features, &out_path);
         }
 
         // If there's an error, such as the decoder failing to find any notes,
@@ -129,9 +132,9 @@ fn process_audio_files(ff: FolkFriend, input: String, with_transcription_query: 
         //  file. Continue with an empty string as the contour. The results
         //  be terrible but that's fair if we couldn't find any notes.
         let lattice_path = feature_decoder
-            .decode_lattice_path(&mut fe.features)
+            .decode_lattice_path(&mut features)
             .unwrap_or(folkfriend::decode::types::LatticePath::new());
-        let contour_string = feature_decoder.decode_contour(&lattice_path, &fe.features).unwrap_or("".to_string());
+        let contour_string = feature_decoder.decode_contour(&lattice_path, &features).unwrap_or("".to_string());
 
         if debug {
             if lattice_path.len() > 0 {
