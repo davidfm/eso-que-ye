@@ -1,4 +1,6 @@
-use crate::feature::types::{Frame, InterpInds, Window};
+// Modified by David Fernández, 2026. See git history for details.
+
+use crate::feature::types::{Frame, InterpInds, Spectrum, Window};
 use crate::ff_config;
 use rustfft::{Fft, algorithm::Radix4, num_complex::Complex};
 
@@ -7,13 +9,12 @@ pub fn modified_autocorrelation(
     window_function: &Window, 
     fft: &Radix4<f32>,
     interp_inds: &InterpInds,
-) -> Frame {
+) -> Spectrum {
     // This is the most important signal processing step of folkfriend.
     //  starting with a 1024 sample long slice of audio signal data, use
     //  Fourier transforms to compute the 'enhanced' autocorrelation, and
-    //  then perform some denoising / filtering steps to create a vector
-    //  of MIDI_NUM features, where each feature is the energy associated
-    //  with that MIDI pitch (i.e., musical note).
+    //  return its energy at SPEC_BINS_PER_MIDI points per MIDI pitch.
+    //  frame_from_spectrum then reduces this to one feature per pitch.
 
     // Define empty buffer for use with this frame
     let mut buffer: [Complex<f32>; ff_config::SPEC_WINDOW_SIZE] =
@@ -70,15 +71,29 @@ pub fn modified_autocorrelation(
     //  Use linear interpolation to find the energy at the frequencies of
     //  each of the MIDI notes in the range of MIDI values that folkfriend
     //  uses.
-    let mut frame: Frame = [0.; ff_config::MIDI_NUM as usize];
+    let mut spectrum: Spectrum = [0.; ff_config::SPEC_BINS_NUM as usize];
     for i in 0..ff_config::SPEC_BINS_NUM as usize {
         // Perform linear interpolation
         let hi_wt = interp_inds[i].hi_weight;
         let lo_wt = interp_inds[i].lo_weight;
         let hi_ac = buffer[interp_inds[i].hi_index].re;
         let lo_ac = buffer[interp_inds[i].hi_index - 1].re;
-        let feature = hi_wt * hi_ac + lo_wt * lo_ac;
-        frame[i / ff_config::SPEC_BINS_PER_MIDI as usize] += feature;
+        spectrum[i] = hi_wt * hi_ac + lo_wt * lo_ac;
+    }
+
+    return spectrum;
+}
+
+pub fn frame_from_spectrum(spectrum: &Spectrum, bin_offset: i32) -> Frame {
+    // Sum the SPEC_BINS_PER_MIDI bins around each MIDI pitch into a single
+    //  feature. A non-zero bin_offset moves every group by that many bins,
+    //  to centre the groups on an instrument that isn't tuned to A = 440 Hz.
+    let mut frame: Frame = [0.; ff_config::MIDI_NUM as usize];
+    for i in 0..ff_config::SPEC_BINS_NUM as usize {
+        let source = i as i32 + bin_offset;
+        if source >= 0 && (source as usize) < spectrum.len() {
+            frame[i / ff_config::SPEC_BINS_PER_MIDI as usize] += spectrum[source as usize];
+        }
     }
 
     // ==========================================

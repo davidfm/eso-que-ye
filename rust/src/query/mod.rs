@@ -1,5 +1,8 @@
+// Modified by David Fernández, 2026. See git history for details.
+
 mod heuristic;
 mod nw;
+mod transpose;
 
 use crate::decode;
 use crate::ff_config;
@@ -9,12 +12,17 @@ use fnv::FnvHashSet as HashSet;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::fmt;
+use transpose::PreparedContour;
 
 pub struct QueryEngine {
     pub tune_index: Option<TuneIndex>,
     setting_ids_by_tune_id: HashMap<TuneID, Vec<SettingID>>,
+    prepared_settings: HashMap<SettingID, PreparedContour>,
     num_repass: usize,
     num_output: usize,
+    // How many keys besides the original to try per setting. 0 disables
+    //  transposition, i.e. only matches in the key the setting is written in.
+    pub transposition_candidates: usize,
 }
 
 #[derive(Debug, Serialize)]
@@ -24,6 +32,8 @@ pub struct TranscriptionQueryRecord {
     pub display_name: String,
     pub aliases: Vec<String>,
     pub score: f32,
+    // Semitones the recording was played above the setting (negative = below)
+    pub transposition: i32,
 }
 
 #[derive(Debug, Serialize)]
@@ -41,8 +51,10 @@ impl QueryEngine {
         QueryEngine {
             tune_index: None,
             setting_ids_by_tune_id: HashMap::new(),
+            prepared_settings: HashMap::new(),
             num_repass: ff_config::QUERY_REPASS_SIZE,
             num_output: 100,
+            transposition_candidates: ff_config::TRANSPOSITION_CANDIDATES,
         }
     }
 
@@ -61,6 +73,13 @@ impl QueryEngine {
         }
 
         self.setting_ids_by_tune_id = setting_ids_by_tune_id;
+        self.prepared_settings = tune_index
+            .settings
+            .iter()
+            .map(|(setting_id, setting)| {
+                (setting_id.clone(), PreparedContour::new(&setting.contour))
+            })
+            .collect();
         self.tune_index = Some(tune_index);
     }
 
@@ -71,13 +90,14 @@ impl QueryEngine {
         match &self.tune_index {
             None => Err(QueryError),
             Some(tune_index) => {
+                let query = PreparedContour::new(contour);
                 //
                 // === Heuristic search ===
                 // First pass: fast, but inaccurate. Good for eliminating many poor candidates.
                 //
                 // let nowh = Instant::now();
                 let mut first_search =
-                    heuristic::run_transcription_query(&contour, &tune_index);
+                    heuristic::run_transcription_query(&query, &self.prepared_settings);
                 first_search.truncate(self.num_repass);
                     // eprintln!("Heuristic search took {:.2?}", nowh.elapsed());
                 //
@@ -85,13 +105,25 @@ impl QueryEngine {
                 // Second pass: slow, but accurate. Good for refining a shortlist of candidates.
                 //
                 // let nowf = Instant::now();
-                let mut second_search: Vec<(SettingID, f32)> = Vec::new();
+                let mut second_search: Vec<(SettingID, f32, i32)> = Vec::new();
                 for (setting_id, _) in &first_search {
-                    let score = nw::needleman_wunsch(
-                        &contour,
-                        &tune_index.settings[setting_id].contour,
-                    );
-                    second_search.push((setting_id.clone(), score));
+                    let setting = &self.prepared_settings[setting_id];
+                    let (score, shift) = transpose::candidate_shifts(
+                        &query.histogram,
+                        &setting.histogram,
+                        self.transposition_candidates,
+                    )
+                    .into_iter()
+                    .map(|shift| {
+                        let mut score =
+                            nw::needleman_wunsch(&query.pitches, &setting.pitches, shift);
+                        if shift != 0 {
+                            score *= ff_config::TRANSPOSED_SCORE_FACTOR;
+                        }
+                        (score, shift)
+                    })
+                    .fold((-f32::INFINITY, 0), |best, x| if x.0 > best.0 { x } else { best });
+                    second_search.push((setting_id.clone(), score, shift));
                 }
                 let mut sorted_rankings: Vec<_> = second_search.into_iter().collect();
                 sorted_rankings.sort_by(|x, y| y.1.partial_cmp(&x.1).unwrap());
@@ -99,7 +131,7 @@ impl QueryEngine {
 
                 let mut tune_ids_in_results: HashSet<TuneID> = HashSet::default();
 
-                for (setting_id, score) in sorted_rankings.iter() {
+                for (setting_id, score, shift) in sorted_rankings.iter() {
                     let setting = &tune_index.settings[setting_id];
                     if tune_ids_in_results.contains(&setting.tune_id) {
                         continue;
@@ -111,6 +143,8 @@ impl QueryEngine {
                         setting_id: setting_id.clone(),
                         setting: setting.clone(),
                         score: *score,
+                        // Query pitch p matched setting pitch p + shift
+                        transposition: -*shift,
                         display_name: tune_aliases[0].clone(),
                         aliases: tune_aliases[1..].to_vec(),
                     });

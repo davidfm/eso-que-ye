@@ -32,11 +32,10 @@ mise run setup      # install wasm-pack and npm dependencies (once)
 mise run wasm       # compile Rust → WebAssembly (re-run when Rust code changes)
 ```
 
-Place your tune index files in `app/public/`:
+Download the latest tune index from the AsturTrad releases into `app/public/` (needs `gh auth login`):
 
 ```bash
-cp /path/to/folkfriend-non-user-data.json app/public/
-cp /path/to/nud-meta.json app/public/
+mise run index      # re-run to pick up new tunes
 ```
 
 ### Development server

@@ -1,6 +1,9 @@
+// Modified by David Fernández, 2026. See git history for details.
+
 use crate::ff_config;
 use crate::index::schema::*;
 use crate::index::TuneIndex;
+use crate::query::transpose::PreparedContour;
 use aho_corasick::{AhoCorasick, Match};
 use std::collections::HashMap;
 
@@ -11,17 +14,17 @@ pub struct ScoredName {
 }
 
 pub fn run_transcription_query(
-    query: &String,
-    // settings_feats: &SettingsFeats,
-    tune_index: &TuneIndex,
+    query: &PreparedContour,
+    prepared_settings: &HashMap<SettingID, PreparedContour>,
 ) -> Vec<(SettingID, usize)> {
-    // let query = trigrams_fast(query);
-    let ngrams = ngrams_str(query, ff_config::QUERY_NGRAM_SIZE_CONTOUR);
+    // Count shared n-grams of note intervals rather than of absolute pitches,
+    //  so that a tune played in a different key isn't dropped from the shortlist.
+    let ngrams = ngrams_str(&query.intervals, ff_config::QUERY_NGRAM_SIZE_INTERVAL);
     let mut ranked_settings: HashMap<SettingID, usize> = HashMap::new();
     let ac = AhoCorasick::new_auto_configured(&ngrams);
-    for (setting_id, setting) in &tune_index.settings {
+    for (setting_id, setting) in prepared_settings {
         let score = ac
-            .find_overlapping_iter(&setting.contour)
+            .find_overlapping_iter(&setting.intervals)
             .collect::<Vec<Match>>()
             .len();
         ranked_settings.insert(setting_id.to_string(), score);

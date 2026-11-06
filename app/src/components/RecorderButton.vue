@@ -174,6 +174,27 @@ export default {
             // Extra to make sure that only one timer is ever active, in case
             //  user spams many recordings in a short space of time.
             store.state.lastTimer = this.recordingTimer;
+
+            // Stop before the time limit once the best match is clear.
+            const timer = this.recordingTimer;
+            const stillThisRecording = () => {
+                return !store.userSettings.advancedMode && store.isRecording() && timer === store.state.lastTimer;
+            };
+            const checkEarlyStop = async () => {
+                if (!stillThisRecording()) {
+                    return;
+                }
+                const confident = await ffBackend.hasConfidentMatch();
+                if (!stillThisRecording()) {
+                    return;
+                }
+                if (confident) {
+                    this.clicked();
+                } else {
+                    setTimeout(checkEarlyStop, ffConfig.EARLY_STOP_CHECK_INTERVAL_MS);
+                }
+            };
+            setTimeout(checkEarlyStop, ffConfig.EARLY_STOP_FIRST_CHECK_MS);
         },
     },
 };

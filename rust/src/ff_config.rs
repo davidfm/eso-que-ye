@@ -1,3 +1,5 @@
+// Modified by David Fernández, 2026. See git history for details.
+
 // Stores important global parameters that are re-used across FolkFriend.
 // MAKE SURE THIS MATCHES CARGO.TOML
 pub const VERSION: &str = "1.3.0";
@@ -52,6 +54,10 @@ pub const SAMPLE_RATE_MAX: u32 = 66_974;
 // Initialise feature extraction with this. It's usually this.
 pub const SAMPLE_RATE_DEFAULT: u32 = 48_000;
 
+// If the instrument is estimated to be at least this far from A = 440 Hz,
+//  move the pitch boundaries by one spectral bin (1/3 semitone) to match it.
+pub const TUNING_CORRECTION_THRESHOLD_CENTS: f32 = 20.;
+
 // Retain only this many features
 pub const RETAINED_FEATURES_PER_FRAME: u32 = 5;
 pub const PITCH_MODEL_WEIGHT: f32 = 0.050;
@@ -80,8 +86,16 @@ pub const CONTOUR_TO_QUERY_CHAR: [char; MIDI_NUM as usize] = [
     'T', 'U', 'V'
 ];
 
-// Just found in testing that with musical notes 4 is better
-//  and with searching strings for names 3 seems to be better :)
-pub const QUERY_NGRAM_SIZE_CONTOUR: usize = 4;  // "quadgram"
+// The first pass compares intervals between notes rather than pitches, so
+//  it isn't affected by key. 3 intervals span 4 notes.
+pub const QUERY_NGRAM_SIZE_INTERVAL: usize = 3;
 pub const QUERY_NGRAM_SIZE_NAME: usize = 3;     // "trigram"
 pub const QUERY_REPASS_SIZE: usize = 2000;
+
+// The second pass aligns absolute pitches in the original key and in the
+//  TRANSPOSITION_CANDIDATES other keys (within TRANSPOSITION_RANGE semitones)
+//  that best fit each setting. Transposed matches are scored slightly lower
+//  so the original key wins a tie.
+pub const TRANSPOSITION_RANGE: i32 = 12;
+pub const TRANSPOSITION_CANDIDATES: usize = 3;
+pub const TRANSPOSED_SCORE_FACTOR: f32 = 0.97;
