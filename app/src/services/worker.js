@@ -10,7 +10,6 @@ import {get,
 class FolkFriendWASMWrapper {
     constructor() {
         this.folkfriendWASM = null;
-        this.abcStringBySetting = {};
 
         this.loadedWASM = new Promise(resolve => {
             this.setLoadedWASM = resolve;
@@ -57,17 +56,8 @@ class FolkFriendWASMWrapper {
             .then((response) => response.json())
             .catch((err) => console.log(err));
 
-        // Lightly postprocess. ABC strings don't go to WASM because
-        //  of slow memory loading in WebAssembly.        
-        let abcStringBySetting = {};
-        for (let settingID in indexData.settings) {
-            abcStringBySetting[settingID] = indexData.settings[settingID].abc;
-            indexData.settings[settingID].abc = '';
-        }
-
         const downloadedTuneIndex = {
-            indexData: indexData,
-            abcStrings: abcStringBySetting
+            indexData: indexData
         };
 
         console.timeEnd('index-fetch');
@@ -158,7 +148,6 @@ class FolkFriendWASMWrapper {
         console.time('tune-index-to-wasm');
         await this.loadedWASM;
         await this.folkfriendWASM.load_index_from_json_obj(tuneIndex.indexData);
-        this.abcStringBySetting = tuneIndex.abcStrings;
         this.setLoadedIndex();
         console.timeEnd('tune-index-to-wasm');
     }
@@ -263,17 +252,10 @@ class FolkFriendWASMWrapper {
         const response = await this.folkfriendWASM.settings_from_tune_id(tuneID);
         let settings = JSON.parse(response);
 
-        // Recall that we delete the ABC string before passing data into WebAssembly,
-        //  because otherwise it takes a lot of time every startup to load that data in
-        //  and it's only used by the frontend and not the backend. So here we reinject
-        //  the ABC strings that are stored in the worker.
-        let settingsIncludingAbc = settings.map(([settingID, setting]) => {
+        cb(settings.map(([settingID, setting]) => {
             setting['setting_id'] = settingID;
-            setting['abc'] = this.abcStringBySetting[settingID];
             return setting;
-        });
-
-        cb(settingsIncludingAbc);
+        }));
     }
 
     async aliasesFromTuneID(tuneID, cb) {
