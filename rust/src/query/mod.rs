@@ -217,40 +217,6 @@ impl QueryEngine {
             .ok_or(format!("missing tune ID {}", tune_id))
             .unwrap())
     }
-
-    pub fn settings_from_tune_id(
-        &self,
-        tune_id: TuneID,
-    ) -> Result<Vec<(SettingID, Setting)>, QueryError> {
-        let tune_index = self.tune_index.as_ref();
-        Ok(self
-            .setting_ids_from_tune_id(tune_id)?
-            .iter()
-            .map(|setting_id| {
-                (
-                    setting_id.clone(),
-                    tune_index
-                        .unwrap()
-                        .settings
-                        .get(setting_id)
-                        .unwrap()
-                        .clone(),
-                )
-            })
-            .collect())
-    }
-
-    pub fn aliases_from_tune_id(&self, tune_id: TuneID) -> Result<Vec<String>, QueryError> {
-        Ok(self
-            .tune_index
-            .as_ref()
-            .unwrap()
-            .aliases
-            .get(&tune_id)
-            .ok_or(format!("missing tune ID {}", tune_id))
-            .unwrap()
-            .to_vec())
-    }
 }
 
 pub struct QueryError;

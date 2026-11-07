@@ -238,32 +238,6 @@ class FolkFriendWASMWrapper {
         const response = await this.folkfriendWASM.run_name_query(query);
         cb(JSON.parse(response));
     }
-
-    async contourToAbc(contour, cb) {
-        await this.loadedWASM;
-        const abc = await this.folkfriendWASM.contour_to_abc(contour);
-        cb(abc);
-    }
-
-    async settingsFromTuneID(tuneID, cb) {
-        await this.loadedWASM;
-        await this.loadedIndex;
-
-        const response = await this.folkfriendWASM.settings_from_tune_id(tuneID);
-        let settings = JSON.parse(response);
-
-        cb(settings.map(([settingID, setting]) => {
-            setting['setting_id'] = settingID;
-            return setting;
-        }));
-    }
-
-    async aliasesFromTuneID(tuneID, cb) {
-        await this.loadedWASM;
-        await this.loadedIndex;
-        const aliases = await this.folkfriendWASM.aliases_from_tune_id(tuneID);
-        cb(JSON.parse(aliases));
-    }
 }
 
 const folkfriendWASMWrapper = new FolkFriendWASMWrapper();
