@@ -108,7 +108,6 @@ fn main() {
                 tune_id: "reference".to_string(),
                 meter: String::new(),
                 mode: String::new(),
-                abc: String::new(),
                 dance: String::new(),
                 contour,
             },

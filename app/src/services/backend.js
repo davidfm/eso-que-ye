@@ -192,7 +192,6 @@ class FFBackend {
             eventBus.$emit('childViewActivated');
         }
 
-        store.state.lastContour = contour;
         store.addToHistory(new HistoryItem({
             contour: contour
         }));
@@ -210,30 +209,6 @@ class FFBackend {
     async runNameQuery(query) {
         return new Promise(resolve => {
             this.folkfriendWorker.runNameQuery(query, Comlink.proxy(response => {
-                resolve(response);
-            }));
-        });
-    }
-
-    async contourToAbc(contour) {
-        return new Promise(resolve => {
-            this.folkfriendWorker.contourToAbc(contour, Comlink.proxy(abc => {
-                resolve(abc);
-            }));
-        });
-    }
-
-    async settingsFromTuneID(tuneID) {
-        return new Promise(resolve => {
-            this.folkfriendWorker.settingsFromTuneID(tuneID, Comlink.proxy(response => {
-                resolve(response);
-            }));
-        });
-    }
-
-    async aliasesFromTuneID(tuneID) {
-        return new Promise(resolve => {
-            this.folkfriendWorker.aliasesFromTuneID(tuneID, Comlink.proxy(response => {
                 resolve(response);
             }));
         });

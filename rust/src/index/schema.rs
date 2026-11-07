@@ -14,7 +14,6 @@ pub struct Setting {
     pub tune_id: TuneID,
     pub meter: String,
     pub mode: String,
-    pub abc: String,
     pub dance: String,
     pub contour: String,
 }

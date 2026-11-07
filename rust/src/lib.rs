@@ -116,20 +116,6 @@ impl FolkFriend {
             decode::types::contour_string_to_contour(contour_string);
         return abc::contour_to_abc(&contour);
     }
-
-    pub fn settings_from_tune_id(
-        &self,
-        tune_id: index::schema::TuneID,
-    ) -> Result<Vec<(index::schema::SettingID, index::schema::Setting)>, query::QueryError> {
-        self.query_engine.settings_from_tune_id(tune_id)
-    }
-
-    pub fn aliases_from_tune_id(
-        &self,
-        tune_id: index::schema::TuneID,
-    ) -> Result<Vec<String>, query::QueryError> {
-        self.query_engine.aliases_from_tune_id(tune_id)
-    }
 }
 
 // Define a WASM-safe version of this FolkFriend class. The key point is that
@@ -256,35 +242,6 @@ impl FolkFriendWASM {
         } else {
             json!({
                 "error": "Name query error".to_string()
-            })
-            .to_string()
-        }
-    }
-    pub fn contour_to_abc(&self, contour_string: &str) -> String {
-        self.ff.contour_to_abc(&contour_string.to_string())
-    }
-
-    pub fn settings_from_tune_id(&self, tune_id: index::schema::TuneID) -> String {
-        // TODO proper error propagation in JSON back to javascript
-        let result = self.ff.settings_from_tune_id(tune_id);
-        if let Ok(settings) = result {
-            return json!(settings).to_string();
-        } else {
-            json!({
-                "error": "Setting ID query error".to_string()
-            })
-            .to_string()
-        }
-    }
-
-    pub fn aliases_from_tune_id(&self, tune_id: index::schema::TuneID) -> String {
-        // TODO proper error propagation in JSON back to javascript
-        let result = self.ff.aliases_from_tune_id(tune_id);
-        if let Ok(aliases) = result {
-            return json!(aliases).to_string();
-        } else {
-            json!({
-                "error": "Aliases from tune ID query error".to_string()
             })
             .to_string()
         }
